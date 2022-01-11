@@ -44,7 +44,7 @@ class LineBotController extends Controller
 
         \Log::debug($log_message);
 
-        $status_code = $this->line_bot_service->reply();
+        $status_code = $this->line_bot_service->reply($request);
 
         return response('', $status_code, []);
     }
