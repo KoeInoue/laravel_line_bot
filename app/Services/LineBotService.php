@@ -53,7 +53,7 @@ class LineBotService
         $signature = $request->header('x-line-signature');
 
         if (SignatureValidator::validateSignature($request->getContent(), config('app.line_channel_secret'), $signature)) {
-            Log::debug("400 signature");
+            \Log::debug("400 signature");
             abort(400);
         }
 
