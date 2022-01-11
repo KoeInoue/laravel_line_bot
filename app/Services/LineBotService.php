@@ -44,12 +44,10 @@ class LineBotService
     {
         // Requestが来たかどうか確認する
         $content = 'Request from LINE';
-        $header = $request->header('x-line-signature');
         $param_str = json_encode($request->all());
         $log_message =
         <<<__EOM__
         $content
-        $header
         $param_str
         __EOM__;
 
@@ -80,15 +78,13 @@ class LineBotService
                             ])
                         );
 
-                        \Log::debug($line_user_id);
-
-                        \Session::put($line_user_id, 'testC');
+                        session([$line_user_id => 'test']);
                     }
                     break;
                 //選択肢とか選んだ時に受信するイベント
                 case $event instanceof PostbackEvent:
                     $answer = $event->getPostbackData();
-                    $session = \Session::get($line_user_id);
+                    $session = session($line_user_id);
                     \Log::debug($session);
                     switch ($session) {
                         case 1: // language
@@ -98,7 +94,7 @@ class LineBotService
                         case 2: // country
                             break;
                         case 3: // category(end)
-                            $newsapi = new NewsApi($your_api_key);
+                            $newsapi = new NewsApi(config('app.news_api_key'));
                             break;
                         default:
                             # code...
