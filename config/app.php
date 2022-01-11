@@ -234,5 +234,5 @@ return [
 
     'line_channel_access_token' => env('LINE_CHANNEL_ACCESS_TOKEN'),
     'line_channel_secret' => env('LINE_CHANNEL_SECRET'),
-
+    'news_api_key' => env('NEWS_API_KEY'),
 ];
