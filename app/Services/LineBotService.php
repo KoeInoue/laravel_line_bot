@@ -84,8 +84,8 @@ class LineBotService
                 //選択肢とか選んだ時に受信するイベント
                 case $event instanceof PostbackEvent:
                     $answer = $event->getPostbackData();
-                    $session = session($line_user_id);
-                    \Log::debug($session);
+                    $sessions = session()->all();
+                    \Log::debug($sessions);
                     switch ($session) {
                         case 1: // language
                             session()->push("$line_user_id.values.1", $answer);
