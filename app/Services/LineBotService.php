@@ -90,7 +90,8 @@ class LineBotService
                 case $event instanceof PostbackEvent:
                     $answer = $event->getPostbackData();
                     $session = session()->get($line_user_id);
-                    switch ($session['step']) {
+                    \Log::debug(implode( ",", $session));
+                    switch ($session) {
                         case 1: // language
                             session()->push("$line_user_id.values.1", $answer);
                             \Log::debug(implode( ",", session()->get($line_user_id)));
