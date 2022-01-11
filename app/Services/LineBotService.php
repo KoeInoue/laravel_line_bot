@@ -37,9 +37,23 @@ class LineBotService
     */
     public function reply(Request $request)
     {
+        // Requestが来たかどうか確認する
+        $content = 'Request from LINE';
+        $header = $request->header('x-line-signature');
+        $param_str = json_encode($request->all());
+        $log_message =
+        <<<__EOM__
+        $content
+        $header
+        $param_str
+        __EOM__;
+
+        \Log::debug($log_message);
+
         $signature = $request->header('x-line-signature');
 
         if (SignatureValidator::validateSignature($request->getContent(), config('app.line_channel_secret'), $signature)) {
+            Log::debug("400 signature");
             abort(400);
         }
 
@@ -73,6 +87,8 @@ class LineBotService
             }
 
             $this->bot->replyText($reply_token, $reply_message);
+
+            return 200;
         }
     }
 }

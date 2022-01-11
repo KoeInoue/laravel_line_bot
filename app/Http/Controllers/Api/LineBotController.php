@@ -31,19 +31,6 @@ class LineBotController extends Controller
     */
     public function reply(Request $request)
     {
-        // Requestが来たかどうか確認する
-        $content = 'Request from LINE';
-        $header = $request->header('x-line-signature');
-        $param_str = json_encode($request->all());
-        $log_message =
-        <<<__EOM__
-        $content
-        $header
-        $param_str
-        __EOM__;
-
-        \Log::debug($log_message);
-
         $status_code = $this->line_bot_service->reply($request);
 
         return response('', $status_code, []);
