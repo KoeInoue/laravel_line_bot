@@ -7,6 +7,7 @@ use LINE\LINEBot\HTTPClient\CurlHTTPClient;
 use LINE\LINEBot;
 use LINE\LINEBot\SignatureValidator;
 use LINE\LINEBot\Event\MessageEvent\TextMessage;
+use LINE\LINEBot\Event\PostbackEvent;
 
 class LineBotService
 {
@@ -54,7 +55,7 @@ class LineBotService
                     \Log::debug('text message');
                     break;
                 //選択肢とか選んだ時に受信するイベント
-                case $event instanceof LINEBot\Event\PostbackEvent:
+                case $event instanceof PostbackEvent:
                     \Log::debug('postback');
                     break;
                 //友達登録＆ブロック解除
@@ -71,7 +72,7 @@ class LineBotService
                     logger()->warning('Unknown event. ['. get_class($event) . ']', compact('body'));
             }
 
-            $bot->replyText($reply_token, $reply_message);
+            $this->bot->replyText($reply_token, $reply_message);
         }
     }
 }
