@@ -8,6 +8,10 @@ use LINE\LINEBot;
 use LINE\LINEBot\SignatureValidator;
 use LINE\LINEBot\Event\MessageEvent\TextMessage;
 use LINE\LINEBot\Event\PostbackEvent;
+use LINE\LINEBot\MessageBuilder\TextMessageBuilder;
+use LINE\LINEBot\TemplateActionBuilder\MessageTemplateActionBuilder;
+use LINE\LINEBot\MessageBuilder\TemplateMessageBuilder;
+use LINE\LINEBot\MessageBuilder\TemplateBuilder\ConfirmTemplateBuilder;
 
 class LineBotService
 {
@@ -35,7 +39,7 @@ class LineBotService
      * @return int
      * @throws \LINE\LINEBot\Exception\InvalidSignatureException
     */
-    public function reply(Request $request)
+    public function reply(Request $request) : int
     {
         // Requestが来たかどうか確認する
         $content = 'Request from LINE';
@@ -51,24 +55,26 @@ class LineBotService
         \Log::debug($log_message);
 
         $signature = $request->header('x-line-signature');
-        $hash = hash_hmac('sha256', $request->getContent(), config('app.line_channel_secret'), true);
-        $expect_signature = base64_encode($hash);
-
-        if (!hash_equals($expect_signature, $signature)) {
-            \Log::debug("400 signature");
-            abort(400);
-        }
+        $this->validateSignature($request, $signature);
 
         $events = $this->bot->parseEventRequest($request->getContent(), $signature);
 
         foreach ($events as $event) {
             $reply_token = $event->getReplyToken();
-            $reply_message = 'その操作はサポートしてません。.[' . get_class($event) . '][' . $event->getType() . ']';
+            $reply_message = 'Please select menu. メニューから選択してください。';
+            $message_builder = new TextMessageBuilder($reply_message);
 
             switch (true){
                 //メッセージの受信
                 case $event instanceof TextMessage:
-                    \Log::debug('text message');
+                    $message_builder = $this->replyConfirmTemplate(
+                        "test",
+                        "test",
+                        [
+                            new MessageTemplateActionBuilder("Yes", "Yes"),
+                            new MessageTemplateActionBuilder("No", "No"),
+                        ]
+                    );
                     break;
                 //選択肢とか選んだ時に受信するイベント
                 case $event instanceof PostbackEvent:
@@ -88,9 +94,50 @@ class LineBotService
                     logger()->warning('Unknown event. ['. get_class($event) . ']', compact('body'));
             }
 
-            $this->bot->replyText($reply_token, $reply_message);
+            $response = $this->bot->replyMessage($reply_token, $message_builder);
 
-            return 200;
+            if (!$response->isSucceeded()) {
+                \Log::error('Failed!' . $response->getHTTPStatus() . ' ' . $response->getRawBody());
+            }
+            return $response->getHTTPStatus();
         }
+    }
+
+    /**
+     * Reply based on the message sent to LINE.
+     * LINEに送信されたメッセージをもとに返信する
+     *
+     * @param Request
+     * @param string
+     * @return void
+     * @throws HttpException
+    */
+    public function validateSignature(Request $request, string $signature) : void
+    {
+        if ($signature === null) {
+            abort(400);
+        }
+
+        $hash = hash_hmac('sha256', $request->getContent(), config('app.line_channel_secret'), true);
+        $expect_signature = base64_encode($hash);
+
+        if (!hash_equals($expect_signature, $signature)) {
+            abort(400);
+        }
+    }
+
+    // Confirmテンプレートを使うためのメソッドです。
+    public function replyConfirmTemplate($alternativeText, $text, ...$actions)
+    {
+        $actionArray = [];
+        foreach ($actions as $value) {
+            array_push($actionArray, $value);
+        }
+
+        return new TemplateMessageBuilder(
+            $alternativeText,
+            // Confirmテンプレートの引数はテキスト、アクションの配列
+            new ConfirmTemplateBuilder($text, $actionArray)
+        );
     }
 }
