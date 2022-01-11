@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use App\Services\LineBotService;
 
 class LineBotController extends Controller
@@ -26,19 +27,25 @@ class LineBotController extends Controller
      * LINE Web HookにてAPI(api/line-bot/reply)がCallされこのメソッドが呼ばれる
      *
      * @param Request
-     * @return void
+     * @return Response
     */
     public function reply(Request $request)
     {
         // Requestが来たかどうか確認する
         $content = 'Request from LINE';
+        $header = $request->header('x-line-signature');
         $param_str = json_encode($request->all());
         $log_message =
         <<<__EOM__
         $content
+        $header
         $param_str
         __EOM__;
 
         \Log::debug($log_message);
+
+        $status_code = $this->line_bot_service->reply();
+
+        return response('', $status_code, []);
     }
 }
