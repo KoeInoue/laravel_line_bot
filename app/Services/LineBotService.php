@@ -67,13 +67,13 @@ class LineBotService
             switch (true){
                 //メッセージの受信
                 case $event instanceof TextMessage:
-                    $message_builder = $this->replyConfirmTemplate(
-                        "test",
-                        "test",
-                        [
+                    $message_builder = new TemplateMessageBuilder(
+                        "test1",
+                        // Confirmテンプレートの引数はテキスト、アクションの配列
+                        new ConfirmTemplateBuilder("test2", [
                             new MessageTemplateActionBuilder("Yes", "Yes"),
                             new MessageTemplateActionBuilder("No", "No"),
-                        ]
+                        ])
                     );
                     break;
                 //選択肢とか選んだ時に受信するイベント
@@ -124,20 +124,5 @@ class LineBotService
         if (!hash_equals($expect_signature, $signature)) {
             abort(400);
         }
-    }
-
-    // Confirmテンプレートを使うためのメソッドです。
-    public function replyConfirmTemplate($alternativeText, $text, ...$actions)
-    {
-        $actionArray = [];
-        foreach ($actions as $value) {
-            array_push($actionArray, $value);
-        }
-
-        return new TemplateMessageBuilder(
-            $alternativeText,
-            // Confirmテンプレートの引数はテキスト、アクションの配列
-            new ConfirmTemplateBuilder($text, $actionArray)
-        );
     }
 }
