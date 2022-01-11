@@ -13,6 +13,7 @@ use LINE\LINEBot\TemplateActionBuilder\PostbackTemplateActionBuilder;
 use LINE\LINEBot\MessageBuilder\TemplateMessageBuilder;
 use LINE\LINEBot\MessageBuilder\TemplateBuilder\ConfirmTemplateBuilder;
 use jcobhams\NewsApi\NewsApi;
+use Illuminate\Support\Facades\Session;
 
 class LineBotService
 {
@@ -78,14 +79,14 @@ class LineBotService
                             ])
                         );
 
-                        session([$line_user_id => 'test']);
+                        Session::put($line_user_id, 'value');
                     }
                     break;
                 //選択肢とか選んだ時に受信するイベント
                 case $event instanceof PostbackEvent:
                     $answer = $event->getPostbackData();
-                    $sessions = session()->all();
-                    \Log::debug(implode(',', $sessions));
+                    $session = Session::get($line_user_id);
+                    \Log::debug(implode(',', $session));
                     switch ($session) {
                         case 1: // language
                             session()->push("$line_user_id.values.1", $answer);
