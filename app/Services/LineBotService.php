@@ -80,10 +80,10 @@ class LineBotService
                             ])
                         );
 
-                        session($line_user_id, [
+                        session([$line_user_id => [
                             'step' => 1,
                             'values' => []
-                        ]);
+                        ]]);
                     }
                     break;
                 //選択肢とか選んだ時に受信するイベント
@@ -92,7 +92,7 @@ class LineBotService
                     $session = session()->get($line_user_id);
                     switch ($session['step']) {
                         case 1: // language
-                            session()->put("$line_user_id.values.1", $answer);
+                            session()->push("$line_user_id.values.1", $answer);
                             \Log::debug(implode( ",", session()->get($line_user_id)));
                             break;
                         case 2: // country
