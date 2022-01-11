@@ -82,7 +82,7 @@ class LineBotService
 
                         \Log::debug($line_user_id);
 
-                        Session::put($line_user_id, 'testC');
+                        \Session::put($line_user_id, 'testC');
                     }
                     break;
                 //選択肢とか選んだ時に受信するイベント
