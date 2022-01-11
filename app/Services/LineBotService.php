@@ -51,8 +51,10 @@ class LineBotService
         \Log::debug($log_message);
 
         $signature = $request->header('x-line-signature');
+        $hash = hash_hmac('sha256', $request->getContent(), config('app.line_channel_secret'), true);
+        $expect_signature = base64_encode($hash);
 
-        if (SignatureValidator::validateSignature($request->getContent(), config('app.line_channel_secret'), $signature)) {
+        if (!hash_equals($expect_signature, $signature)) {
             \Log::debug("400 signature");
             abort(400);
         }
