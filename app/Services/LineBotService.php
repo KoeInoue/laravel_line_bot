@@ -70,12 +70,11 @@ class LineBotService
                 //メッセージの受信
                 case $event instanceof TextMessage:
                     if ($event->getText() === 'pick news type') {
-
                         session()->forget($line_user_id);
 
                         $message_builder = new TemplateMessageBuilder(
                             "Select Language / 言語選択",
-                            new ConfirmTemplateBuilder("Pick one", [
+                            new ConfirmTemplateBuilder("Select Language / 言語選択", [
                                 new PostbackTemplateActionBuilder("Engish", "en"),
                                 new PostbackTemplateActionBuilder("日本語", "jp"),
                             ])
@@ -90,8 +89,8 @@ class LineBotService
                 //選択肢とか選んだ時に受信するイベント
                 case $event instanceof PostbackEvent:
                     $answer = $event->getPostbackData();
-                    $step = session($line_user_id)['step'];
-                    switch ($step) {
+                    $session = session()->get($line_user_id);
+                    switch ($session['step']) {
                         case 1: // language
                             session()->put("$line_user_id.values.1", $answer);
                             \Log::debug(implode( ",", session()->get($line_user_id)));
