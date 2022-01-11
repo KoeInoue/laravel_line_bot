@@ -9,7 +9,7 @@ use LINE\LINEBot\SignatureValidator;
 use LINE\LINEBot\Event\MessageEvent\TextMessage;
 use LINE\LINEBot\Event\PostbackEvent;
 use LINE\LINEBot\MessageBuilder\TextMessageBuilder;
-use LINE\LINEBot\TemplateActionBuilder\MessageTemplateActionBuilder;
+use LINE\LINEBot\TemplateActionBuilder\PostbackTemplateActionBuilder;
 use LINE\LINEBot\MessageBuilder\TemplateMessageBuilder;
 use LINE\LINEBot\MessageBuilder\TemplateBuilder\ConfirmTemplateBuilder;
 
@@ -39,7 +39,7 @@ class LineBotService
      * @return int
      * @throws \LINE\LINEBot\Exception\InvalidSignatureException
     */
-    public function reply(Request $request) : int
+    public function eventHandler(Request $request) : int
     {
         // Requestが来たかどうか確認する
         $content = 'Request from LINE';
@@ -68,17 +68,17 @@ class LineBotService
                 //メッセージの受信
                 case $event instanceof TextMessage:
                     $message_builder = new TemplateMessageBuilder(
-                        "test1",
+                        "Please select / 選択してください",
                         // Confirmテンプレートの引数はテキスト、アクションの配列
-                        new ConfirmTemplateBuilder("test2", [
-                            new MessageTemplateActionBuilder("Yes", "Yes"),
-                            new MessageTemplateActionBuilder("No", "No"),
+                        new ConfirmTemplateBuilder("Pick one", [
+                            new PostbackTemplateActionBuilder("Yes", "Yes"),
+                            new PostbackTemplateActionBuilder("No", "No"),
                         ])
                     );
                     break;
                 //選択肢とか選んだ時に受信するイベント
                 case $event instanceof PostbackEvent:
-                    \Log::debug('postback');
+                    \Log::debug("postback" + json_encode($event));
                     break;
                 //友達登録＆ブロック解除
                 // case $event instanceof LINEBot\Event\FollowEvent:

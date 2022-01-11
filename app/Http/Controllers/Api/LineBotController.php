@@ -31,7 +31,7 @@ class LineBotController extends Controller
     */
     public function reply(Request $request)
     {
-        $status_code = $this->line_bot_service->reply($request);
+        $status_code = $this->line_bot_service->eventHandler($request);
 
         return response('', $status_code, []);
     }
