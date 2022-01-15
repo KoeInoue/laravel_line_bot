@@ -60,27 +60,35 @@ class LineBotService
     */
     public function eventHandler(Request $request) : int
     {
-        $signature = $request->header('x-line-signature');
+        // Verify the signature and exclude requests from other than LINE.
+        // 署名を検証しLINE以外からのリクエストを受け付けない。
         $this->validateSignature($request, $signature);
 
+        // Parse event request to Event objects.
+        // リクエストをEventオブジェクトに変換する
         $events = $this->bot->parseEventRequest($request->getContent(), $signature);
 
         foreach ($events as $event) {
+            // Can't reply without reply token
             $reply_token = $event->getReplyToken();
+            // LINE message sent when there is an invalid operation.
             $message_builder = new TextMessageBuilder('Invalid operation. 無効な操作です。');
+            // Line user id
             $line_user_id = $event->getUserId();
 
             switch (true){
-                //メッセージの受信
+                // When got text message
                 case $event instanceof TextMessage:
-                    if ($event->getText() === 'pick news type') {
+                    if ($event->getText() === 'pick news type') { // Only when text is sent with "pick news type"
+                        // Reset all answer
                         $this->answer_model->resetStep($line_user_id);
+                        // build message will be sent on step 0 (country)
                         $message_builder = $this->buildStep0Msg();
 
                         $this->answer_model->storeNextStep($line_user_id, 0);
                     }
                     break;
-                //選択肢とか選んだ時に受信するイベント
+                // Events you receive when you make a choice or select something.
                 case $event instanceof PostbackEvent:
                     $postback_answer = $event->getPostbackData();
                     $current_answer = $this->answer_model->latest()->where('answer', '')->first();
@@ -105,6 +113,7 @@ class LineBotService
                             $this->answer_model->storeAnswer($current_answer, $postback_answer);
 
                             $answers = $this->answer_model->where('line_user_id', $line_user_id)->get();
+
                             $category = $answers->whereStrict('step', 2)->first()->answer;
                             $language = $answers->whereStrict('step', 0)->first()->answer;
                             $country = $answers->whereStrict('step', 1)->first()->answer;
@@ -118,14 +127,14 @@ class LineBotService
                     }
 
                     break;
-                //友達登録＆ブロック解除
-                // case $event instanceof LINEBot\Event\FollowEvent:
+                // ADD FRIEND
+                // case $event instanceof FollowEvent:
                 //     break;
-                // //位置情報の受信
-                // case $event instanceof LINEBot\Event\MessageEvent\LocationMessage:
+                // LOCASTION
+                // case $event instanceof LocationMessage:
                 //     break;
-                //ブロック
-                // case $event instanceof LINEBot\Event\UnfollowEvent:
+                // BLOCK
+                // case $event instanceof UnfollowEvent:
                 //     break;
                 default:
                     $body = $event->getEventBody();
@@ -147,12 +156,12 @@ class LineBotService
      * LINEの署名確認
      *
      * @param Request
-     * @param string
      * @return void
      * @throws HttpException
     */
-    public function validateSignature(Request $request, string $signature) : void
+    public function validateSignature(Request $request) : void
     {
+        $signature = $request->header('x-line-signature');
         if ($signature === null) {
             abort(400);
         }
