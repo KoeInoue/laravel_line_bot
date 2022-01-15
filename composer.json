@@ -12,7 +12,8 @@
         "laravel/framework": "^8.75",
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
-        "linecorp/line-bot-sdk": "^3.6"
+        "linecorp/line-bot-sdk": "^3.6",
+        "ext-pdo_sqlite": "*"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.6",
