@@ -62,7 +62,7 @@ class LineBotService
     {
         // Verify the signature and exclude requests from other than LINE.
         // 署名を検証しLINE以外からのリクエストを受け付けない。
-        $this->validateSignature($request, $signature);
+        $this->validateSignature($request);
 
         // Parse event request to Event objects.
         // リクエストをEventオブジェクトに変換する
@@ -256,8 +256,16 @@ class LineBotService
                     break;
                 }
 
-                $url = str_replace("\\", "", $source->url);
-                $url = str_replace("http:", "https:", $url);
+                $replacement = [
+                    '\\' => $source->url,
+                    'http:' => 'https:'
+                ];
+
+                $url = str_replace(
+                    array_keys($replacement),
+                    array_values($replacement),
+                    $source->url
+                );
 
                 $link = new UriTemplateActionBuilder('See This News', $url);
 
