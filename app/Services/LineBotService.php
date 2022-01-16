@@ -66,7 +66,7 @@ class LineBotService
 
         // Parse event request to Event objects.
         // リクエストをEventオブジェクトに変換する
-        $events = $this->bot->parseEventRequest($request->getContent(), $signature);
+        $events = $this->bot->parseEventRequest($request->getContent(), $request->header('x-line-signature'));
 
         foreach ($events as $event) {
             // Can't reply without reply token
