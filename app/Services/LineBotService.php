@@ -166,6 +166,7 @@ class LineBotService
                 default: // Could not detect event
                     $body = $event->getEventBody();
                     logger()->warning('Unknown event. ['. get_class($event) . ']', compact('body'));
+                    break;
             }
 
             // Reply to LINE
